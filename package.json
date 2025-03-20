@@ -1,6 +1,6 @@
 {
   "name": "note-mark",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "A Markdown Note taking app built with Electron",
   "license": "MIT",
   "main": "./out/main/index.js",
