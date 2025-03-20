@@ -5,8 +5,13 @@ if (!process.contextIsolated) {
 }
 
 try {
-  contextBridge.exposeInMainWorld('context', {
+  contextBridge.exposeInMainWorld('electron', {
     locale: navigator.language,
+    ipcRenderer: {
+      send: (channel, data) => ipcRenderer.send(channel, data),
+      on: (channel, callback) => ipcRenderer.on(channel, (_, data) => callback(data)),
+      removeListener: (channel, callback) => ipcRenderer.removeListener(channel, callback)
+    },
     getNotes: (...args: Parameters<any>) => ipcRenderer.invoke('getNotes', ...args),
     readNote: (...args: Parameters<any>) => ipcRenderer.invoke('readNote', ...args),
     writeNote: (...args: Parameters<any>) => ipcRenderer.invoke('writeNote', ...args),

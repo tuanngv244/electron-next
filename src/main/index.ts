@@ -1,21 +1,24 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { BrowserWindow, app, globalShortcut, ipcMain, shell } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 // import icon from '../../resources/favicon-48.png?asset'
 
-const isProd = process.env.NODE_ENV === 'production'
+const isProd = false // process.env.NODE_ENV === 'production'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width: 1560,
+    height: 880,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon: '../../resources/favicon-48.png?asset' } : {}),
+    // ...(process.platform === 'linux'
+    //   ? { icon: path.join('../../resources/favicon-48.png?asset') }
+    //   : {}),
+    icon: path.join(__dirname, '../../resources/icon.ico'),
     center: true,
     title: 'NextJS',
-    frame: false,
+    // frame: false,
     vibrancy: 'under-window',
     visualEffectState: 'active',
     titleBarStyle: 'hidden',
@@ -39,32 +42,37 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  ipcMain.handle('toggle-content-protection', (_, enable: boolean) => {
-    if (mainWindow) {
-      mainWindow.setContentProtection(enable)
-      if (process.platform === 'darwin') {
-        const shortcuts = ['Control+Shift+5']
-        shortcuts.forEach((shortcut) => {
-          globalShortcut.register(shortcut, () => {
-            console.log(`Blocked screen capture shortcut: ${shortcut}`)
-            mainWindow.webContents.send('screen-capture-attempted', {
-              type: 'recording',
-              timestamp: new Date().toISOString()
-            })
-          })
-        })
+  // ipcMain.handle('toggle-content-protection', (_, enable: boolean) => {
+  //   if (mainWindow) {
+  //     mainWindow.setContentProtection(enable)
+  //     if (process.platform === 'darwin') {
+  const shortcuts = ['Control+Shift+5']
+  shortcuts.forEach((shortcut) => {
+    globalShortcut.register(shortcut, () => {
+      console.log(`Blocked screen capture shortcut: ${shortcut}`)
 
-        app.on('will-quit', () => {
-          globalShortcut.unregisterAll()
-        })
-      }
-      return enable
-    }
-    return false
+      ipcMain.on('capture-event', (data) => {
+        console.log('Capture Event:', data)
+      })
+
+      mainWindow.webContents.send('screen-capture-attempted', {
+        type: 'recording',
+        timestamp: new Date().toISOString()
+      })
+    })
   })
 
+  app.on('will-quit', () => {
+    globalShortcut.unregisterAll()
+  })
+  //     }
+  //     return enable
+  //   }
+  //   return false
+  // })
+
   require('child_process').exec('npm run dev', {
-    cwd: join(__dirname, './renderer')
+    cwd: join(__dirname, '../../src/renderer')
   })
 
   // const devPath = 'http://localhost:5000'
@@ -76,6 +84,16 @@ function createWindow(): void {
     // mainWindow.loadURL(`http://localhost:${port}`)
     mainWindow.loadURL(`http://localhost:5000`)
   }
+
+  mainWindow.webContents.session.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      if (permission === 'media') {
+        callback(true) // Automatically allow camera (and microphone) access
+      } else {
+        callback(false)
+      }
+    }
+  )
 }
 
 app.whenReady().then(() => {

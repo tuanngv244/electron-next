@@ -1,6 +1,6 @@
 {
   "name": "note-mark",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A Markdown Note taking app built with Electron",
   "license": "MIT",
   "main": "./out/main/index.js",
@@ -19,6 +19,37 @@
     "build:mac": "electron-vite build && electron-builder --mac --config",
     "build:linux": "electron-vite build && electron-builder --linux --config"
   },
+  "build": {
+    "appId": "com.hcm.yourapp",
+    "productName": "Take Photo",
+    "files": [
+      "out/**/*",
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "win": {
+      "icon": "resources/icon.ico"
+    },
+    "mac": {
+      "icon": "resources/icon.icns"
+    },
+    "linux": {
+      "icon": "resources/icon.png"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "tuanngv244",
+        "repo": "electron-next",
+        "releaseType": "release"
+      }
+    ]
+  },
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^2.0.0",
@@ -27,6 +58,7 @@
     "electron-store": "^10.0.1",
     "electron-updater": "^6.3.9",
     "fs-extra": "^11.2.0",
+    "html2canvas": "^1.4.1",
     "jotai": "^2.6.1"
   },
   "devDependencies": {
